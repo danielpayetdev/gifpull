@@ -28,7 +28,8 @@ export const gifPullSlackAction = functions.https.onRequest(async (request, resp
     try {
       const actionId = action.actions[0].action_id;
       if (actionId.startsWith("send")) {
-        const data: SlackResponse = getGifBlocks(action?.actions?.[0]?.value as string, action?.user);
+        const value = JSON.parse(action?.actions?.[0]?.value as string);
+        const data: SlackResponse = getGifBlocks(value, action?.user);
         await sendSlackMessage(data, action.response_url);
       } else if (actionId === "nextPage") {
         const value = JSON.parse(action?.actions?.[0]?.value as string);
@@ -92,15 +93,15 @@ const getSlackBlocks = async (text: string, pos: number): Promise<SlackResponse>
   const tenorResult = await getTenorResult(text, pos);
   let messageFormat = SlackResponse.create().addHeader("Selectionez un gif à envoyer");
   tenorResult.results.forEach((result, index) => {
-    messageFormat = messageFormat.addDivider().addGifSelector(result.media[0].tinygif.url, index);
+    messageFormat = messageFormat.addDivider().addGifSelector(result.media[0].tinygif.url, index, text);
   });
   messageFormat.addButtonNextPage(pos + GIF_PER_PAGE, text);
   messageFormat.replace_original = true;
   return messageFormat;
 };
 
-const getGifBlocks = (url: string, sender: User): SlackResponse => {
-  const messageFormat = SlackResponse.create().addGif(url, `<@${sender.id}> a envoyé un gif`, );
+const getGifBlocks = (data: {imageUrl: string, text: string}, sender: User): SlackResponse => {
+  const messageFormat = SlackResponse.create().addGif(data.imageUrl, `<@${sender.id}> a envoyé un gif`, data.text);
   messageFormat.delete_original = true;
   messageFormat.setInChannel();
   return messageFormat;

@@ -70,17 +70,17 @@ export class SlackResponse {
     return this;
   }
 
-  public addGifSelector(imageUrl: string, index: number): SlackResponse {
+  public addGifSelector(imageUrl: string, index: number, text: string): SlackResponse {
     this.addBlock(new ImageBlock(imageUrl));
-    this.addBlock(new ActionBlock(new ButtonBlock(`send-${index}`, imageUrl, "Envoyer", ButtonStyle.PRIMARY)));
+    this.addBlock(new ActionBlock(new ButtonBlock(`send-${index}`, JSON.stringify({ imageUrl, text }), "Envoyer", ButtonStyle.PRIMARY)));
     return this;
   }
 
-  public addGif(imageUrl: string, title?: string): SlackResponse {
+  public addGif(imageUrl: string, title?: string, imageTitle?: string): SlackResponse {
     if (title != undefined) {
       this.addBlock(new SectionBlock(new MarkdownBlock(title)));
     }
-    this.addBlock(new ImageBlock(imageUrl));
+    this.addBlock(new ImageBlock(imageUrl, imageTitle ? new TextBlock(imageTitle) : undefined));
     return this;
   }
 
@@ -135,7 +135,7 @@ export class ImageBlock implements TypeBlock {
   alt_text = "amazing gif";
 
   // eslint-disable-next-line camelcase
-  constructor(public image_url: string) { }
+  constructor(public image_url: string, public title?: TextBlock) { }
 }
 
 export class ActionBlock implements TypeBlock {
