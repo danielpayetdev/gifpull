@@ -1,7 +1,7 @@
 import { TextBlock } from "./slack-response";
 
 /* eslint-disable camelcase */
-export interface SlackParams {
+export interface SlackCmd {
   token: string;
   team_id: string;
   team_domain: string;
